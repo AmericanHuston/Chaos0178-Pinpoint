@@ -28,9 +28,6 @@ import org.firstinspires.ftc.teamcode.messages.PoseMessage;
 @Config
 public class PinpointDrive extends MecanumDrive {
     public static class Params {
-        /*
-        Set this to the name that your Pinpoint is configured as in your hardware config.
-         */
         public String pinpointDeviceName = "pinpoint";
         /*
         Set the odometry pod positions relative to the point that the odometry computer tracks around.
