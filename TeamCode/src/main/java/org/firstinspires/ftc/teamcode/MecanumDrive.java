@@ -63,13 +63,13 @@ public class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP;
 
         // drive model parameters
-        public double inPerTick = 1; // If you're using OTOS/Pinpoint leave this at 1 (all values will be in inches, 1 tick = 1 inch)
-        public double lateralInPerTick = 0.7522439955588253; // Tune this with LateralRampLogger (even if you use OTOS/Pinpoint)
-        public double trackWidthTicks = 13.872371306456166;
+        public double inPerTick = 1.1475164238288;
+        public double lateralInPerTick = 0.8997084988562086;
+        public double trackWidthTicks = 13.63867595610382;
 
         // feed forward parameters (in tick units)
-        public double kS = 0.9610187615364696;
-        public double kV = 0.17754851481348605;
+        public double kS = 0.881061267192579;
+        public double kV = 0.17735358280765334;
         public double kA = 0.023;
 
         // path profile parameters (in inches)
@@ -223,8 +223,7 @@ public class MecanumDrive {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        // TODO: make sure your config has motors with these names (or change them)
-        //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
+
         leftFront = hardwareMap.get(DcMotorEx.class, "frontLeft");
         leftBack = hardwareMap.get(DcMotorEx.class, "backLeft");
         rightBack = hardwareMap.get(DcMotorEx.class, "backRight");
@@ -239,8 +238,7 @@ public class MecanumDrive {
            leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
            leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
-        //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
+
         lazyImu = new LazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
                 PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 
