@@ -42,7 +42,7 @@ public class arm extends LinearOpMode {
     public static double COLLECTION_POWER = 150;
     public static double Sliderpowerup = 2500;
     public static double Sliderpowerdown = 500;
-    public static int resting_position = 0;
+    public static int resting_position = 30;
     public static int basket_position = 170;
     public static int specimen_position = 220;
     public static int collection_position = 410;
@@ -101,13 +101,15 @@ public class arm extends LinearOpMode {
             if (gamepad1.back) {
                 imu.resetYaw();
             }
-            /*if(this.gamepad2.dpad_up){
+            /*
+            if(this.gamepad2.dpad_up){
                 sliderPreset1();
 //                slidersGo(sliderSpeed);
             }
             if(this.gamepad2.dpad_down){
                 slidersGo(-sliderSpeed); //Go down, so negative
-            }*/
+            }
+            */
             if(this.gamepad2.left_bumper) {
                 servo(claw, 0.4);
             }
@@ -241,7 +243,7 @@ public class arm extends LinearOpMode {
     public void servo(Servo servo, double increment){
         double position = servo.getPosition();
         position = position + increment;
-        servo.setPosition(position); //Tell the servo to go to the correct pos
+        servo.setPosition(position);
     }
     //driving is working, field centric
     private void pointAtBasket() {
