@@ -63,12 +63,14 @@ public class arm extends LinearOpMode {
     DcMotor backRightMotor;
     Servo wrist;
     Servo claw;
+    TouchSensor sliderButton;
     public static double  wrist_position = (MAX_POS - MIN_POS) / 2;
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         imu = hardwareMap.get(IMU.class, "imu");
+        sliderButton = hardwareMap.touchSensor.get("sliderButton");
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
         backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         frontRightMotor = hardwareMap.dcMotor.get("frontRight");
@@ -155,6 +157,9 @@ public class arm extends LinearOpMode {
                 SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 SliderLeft.setVelocity(Sliderpowerdown);
                 SliderRight.setVelocity(Sliderpowerdown);
+            }
+            if (sliderButton.isPressed()){
+                Shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             }
 
             driving();
