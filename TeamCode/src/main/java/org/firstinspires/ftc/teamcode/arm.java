@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -54,8 +54,8 @@ public class arm extends LinearOpMode {
     public static int slidersdown = 0;
     public static int slidersup = 2800;
     public static double MAX_POS     =  1.0;     // Maximum rotational position
-    public static double MIN_POS     =  0.0;// Minimum rotational position
-    double output;
+    public static double MIN_POS     =  0.0;     // Minimum rotational position
+
     IMU imu;
     DcMotor frontLeftMotor;
     DcMotor backLeftMotor;
@@ -94,9 +94,6 @@ public class arm extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         final double sliderSpeed = 0.35;
         state = armState.RESTING;
-        claw.setPosition(0.5);
-        boolean open = true;
-        boolean changed = false;
 
 
         waitForStart();
@@ -114,23 +111,12 @@ public class arm extends LinearOpMode {
                 slidersGo(-sliderSpeed); //Go down, so negative
             }
             */
-            if(gamepad2.right_trigger > 0.01) {
-                output = Range.scale(gamepad2.right_trigger, 0.0, 1.0, 0.5, 0.99);
-                claw.setPosition(output);
+            if(this.gamepad2.left_bumper) {
+                servo(claw, 0.4);
             }
-            if(gamepad2.right_bumper && !changed){
-                if(open) {
-                    claw.setPosition(0.99);
-                }else{
-                    claw.setPosition(0.5);
-                }
-                changed = true;
-                open = !open;
-            } else if (!gamepad2.right_bumper) {
-                changed = false;
+            if(this.gamepad2.right_bumper){
+                servo(claw, -0.4);
             }
-
-
             wrist_position = gamepad2.left_stick_y;
             if (gamepad2.y) {
                 state = armState.RESTING;
@@ -182,7 +168,6 @@ public class arm extends LinearOpMode {
             telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles().getYaw());
             telemetry.addData("arm ticks", rest);
             telemetry.addData("Current ", Shoulder.getCurrent(CurrentUnit.AMPS));
-            telemetry.addData("ClawPos", output);
             telemetry.update();
         }
     }
