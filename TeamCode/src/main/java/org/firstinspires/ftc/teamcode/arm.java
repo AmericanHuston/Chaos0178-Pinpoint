@@ -116,15 +116,6 @@ public class arm extends LinearOpMode {
             if (gamepad1.back) {
                 imu.resetYaw();
             }
-            /*
-            if(this.gamepad2.dpad_up){
-                sliderPreset1();
-//                slidersGo(sliderSpeed);
-            }
-            if(this.gamepad2.dpad_down){
-                slidersGo(-sliderSpeed); //Go down, so negative
-            }
-            */
             if(gamepad2.right_trigger > 0.01) {
                 output = Range.scale(gamepad2.right_trigger, 0.0, 1.0, 0.5, 0.99);
                 claw.setPosition(output);
@@ -147,28 +138,14 @@ public class arm extends LinearOpMode {
                 Shoulder.setTargetPosition(shoulder_new_position);
             }
 
-
-
             wrist_position = gamepad2.left_stick_y;
-            if (gamepad2.y) {
-                state = armState.RESTING;
-            }
-
-            if (gamepad2.x) {
-                state = armState.BASKET;
-            }
-
-            if (gamepad2.a) {
-                state = armState.SPECIMEN;
-            }
-
-            if (gamepad2.b) {
-                state = armState.COLLECTION;
-            }
+            if (gamepad2.y) { state = armState.RESTING; }
+            if (gamepad2.x) { state = armState.BASKET; }
+            if (gamepad2.a) { state = armState.SPECIMEN; }
+            if (gamepad2.b) { state = armState.COLLECTION; }
             if (gamepad2.left_bumper) {
                 rest +=.01;
             }
-
             if (gamepad2.right_bumper) {
                 rest -=.01;
             }
@@ -214,32 +191,7 @@ public class arm extends LinearOpMode {
             telemetry.update();
         }
     }
-    //Fixes slider stopping issue
-    /*public void slidersStop(){
-        int rightTarget = SliderRight.getCurrentPosition();
-        int leftTarget = SliderLeft.getCurrentPosition();
-        SliderLeft.setTargetPosition(leftTarget);
-        SliderRight.setTargetPosition(rightTarget);
-        SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        SliderRight.setPower(0.2);
-        SliderLeft.setPower(0.2);
 
-    }
-    public void slidersGo(double power){
-        int leftPos = SliderLeft.getCurrentPosition();
-        int rightPos = SliderRight.getCurrentPosition();
-        SliderRight.setTargetPosition(100);
-        SliderLeft.setTargetPosition(100);
-        SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        telemetry.addData("leftPos", leftPos);
-        telemetry.addData("rightPos", rightPos);
-        telemetry.update();
-        SliderLeft.setPower(power);
-        SliderRight.setPower(power);
-    }*/
-    //yet to be tested, kind of works
    //sets shoulder motor position need the right presets
     public void arm(){
         telemetry.addData("state", String.valueOf(state));
@@ -324,24 +276,13 @@ public class arm extends LinearOpMode {
         double  Kp = 0.2;
         double currentYaw = imu.getRobotYawPitchRollAngles().getYaw();
         double power = Kp *(pointAt - currentYaw);
-        power = clamp(power, -MAXPOWER, MAXPOWER);
+        power = Range.clip(power, -MAXPOWER, MAXPOWER);
         backLeftPower = power;
         frontLeftPower = power;
         backRightPower  = -power;
         frontRightPower = -power;
     }
-
-    public double clamp(double input, double min, double max) {
-        double result = input;
-        if (input > max) {
-            result = max;
-        } else if (input < min) {
-            result = min;
-        }
-        return result;
-    }
     public void driving() {
-
         double y = -gamepad1.left_stick_y / 2; // Remember, Y stick value is reversed
         double x = gamepad1.left_stick_x / 2;
         double rx = gamepad1.right_stick_x / 2;
@@ -373,20 +314,6 @@ public class arm extends LinearOpMode {
         backLeftMotor.setPower(backLeftPower);
         frontRightMotor.setPower(frontRightPower);
         backRightMotor.setPower(backRightPower);
-
-    }
-    //High basket, up_dpad
-    public void sliderPreset1(){
-        int rightTargetPos = 3800;
-        int leftTargetPos = 3800;
-        if(SliderRight.getCurrentPosition() < rightTargetPos || SliderLeft.getCurrentPosition() < leftTargetPos) {
-            SliderLeft.setPower(0.35);
-            SliderRight.setPower(0.35);
-            SliderLeft.setTargetPosition(leftTargetPos);
-            SliderRight.setTargetPosition(rightTargetPos);
-            telemetry.addData("sliderpreset1", "Active");
-        }
-        telemetry.addData("sliderpreset1", "inactive");
 
     }
 }
