@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -31,31 +32,39 @@ public class arm extends LinearOpMode {
         RESTING,
         BASKET,
         SPECIMEN,
-        COLLECTION
+        COLLECTION,
+        above_bar,
+        below_bar
+
     }
     armState state;
 
     public static double rest;
 
-    public static double RESTING_POWER = 100;
-    public static double BASKET_POWER = 100;
-    public static double SPECIMEN_POWER = 100;
+    public static double RESTING_POWER = 150;
+    public static double BASKET_POWER = 200;
+    public static double SPECIMEN_POWER = 150;
     public static double COLLECTION_POWER = 150;
     public static double Sliderpowerup = 2500;
-    public static double Sliderpowerdown = 500;
-    public static int resting_position = 30;
+    public static double Sliderpowerdown = 1200;
+    public static int resting_position = 50;
     public static int basket_position = 170;
     public static int specimen_position = 220;
     public static int collection_position = 410;
-    public static double wristpos_resting = 0;
+    public static double wristpos_resting = 0.15;
     public static double wristpos_basket = 0.6;
     public static double wristpos_specimen = 0.8;
     public static double wristpos_collection = 0.85;
-    public static int slidersdown = 0;
+    public static int slidersdown = 40;
     public static int slidersup = 2800;
     public static double MAX_POS     =  1.0;     // Maximum rotational position
-    public static double MIN_POS     =  0.0;     // Minimum rotational position
-
+    public static double MIN_POS     =  0.0;// Minimum rotational position
+    public static int slider_above_bar_position = 500;
+    public static int slider_below_bar_position = 400;
+    public static int shoulder_bar_position = 170;
+    public static double wrist_bar_position = 0.39;
+    public static int shoulder_bar_velotity = 160;
+    double output;
     IMU imu;
     DcMotor frontLeftMotor;
     DcMotor backLeftMotor;
@@ -96,6 +105,9 @@ public class arm extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         final double sliderSpeed = 0.35;
         state = armState.RESTING;
+        claw.setPosition(0.5);
+        boolean open = true;
+        boolean changed = false;
 
 
         waitForStart();
@@ -113,12 +125,30 @@ public class arm extends LinearOpMode {
                 slidersGo(-sliderSpeed); //Go down, so negative
             }
             */
-            if(this.gamepad2.left_bumper) {
-                servo(claw, 0.4);
+            if(gamepad2.right_trigger > 0.01) {
+                output = Range.scale(gamepad2.right_trigger, 0.0, 1.0, 0.5, 0.99);
+                claw.setPosition(output);
             }
-            if(this.gamepad2.right_bumper){
-                servo(claw, -0.4);
+            if(gamepad2.right_bumper && !changed){
+                if(open) {
+                    claw.setPosition(0.99);
+                }else{
+                    claw.setPosition(0.5);
+                }
+                changed = true;
+                open = !open;
+            } else if (!gamepad2.right_bumper) {
+                changed = false;
             }
+            if (gamepad2.right_stick_x> 0.01|| gamepad2.right_stick_x < -0.01)  {
+                int shoulder_position = Shoulder.getTargetPosition();
+                int shoulder_change = (int)gamepad2.right_stick_x * 10;
+                int shoulder_new_position = shoulder_position + shoulder_change;;
+                Shoulder.setTargetPosition(shoulder_new_position);
+            }
+
+
+
             wrist_position = gamepad2.left_stick_y;
             if (gamepad2.y) {
                 state = armState.RESTING;
@@ -158,8 +188,15 @@ public class arm extends LinearOpMode {
                 SliderLeft.setVelocity(Sliderpowerdown);
                 SliderRight.setVelocity(Sliderpowerdown);
             }
+            if (gamepad2.dpad_left) {
+                state = armState.above_bar;
+            }
+            if (gamepad2.dpad_right) {
+                state = armState.below_bar;
+            }
             if (sliderButton.isPressed()){
-                Shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                SliderLeft.setMotorDisable();
+                SliderRight.setMotorDisable();
             }
 
             driving();
@@ -173,6 +210,7 @@ public class arm extends LinearOpMode {
             telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles().getYaw());
             telemetry.addData("arm ticks", rest);
             telemetry.addData("Current ", Shoulder.getCurrent(CurrentUnit.AMPS));
+            telemetry.addData("ClawPos", output);
             telemetry.update();
         }
     }
@@ -239,7 +277,32 @@ public class arm extends LinearOpMode {
                 Shoulder.setVelocity(COLLECTION_POWER);
                 wrist.setPosition(wristpos_collection);
                 break;
+            case above_bar:
+                Shoulder.setTargetPosition(shoulder_bar_position);
+                Shoulder.setVelocity(shoulder_bar_velotity);
+                wrist.setPosition(wrist_bar_position);
+                SliderLeft.setTargetPosition(slider_above_bar_position);
+                SliderRight.setTargetPosition(slider_above_bar_position);
+                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SliderLeft.setVelocity(Sliderpowerup);
+                SliderRight.setVelocity(Sliderpowerup);
+                break;
+            case below_bar:
+                Shoulder.setTargetPosition(shoulder_bar_position);
+                Shoulder.setVelocity(shoulder_bar_velotity);
+                wrist.setPosition(wrist_bar_position);
+                SliderLeft.setTargetPosition(slider_below_bar_position);
+                SliderRight.setTargetPosition(slider_below_bar_position);
+                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                SliderLeft.setVelocity(Sliderpowerdown);
+                SliderRight.setVelocity(Sliderpowerdown);
+                break;
+
+
         }
+
 
         Shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
