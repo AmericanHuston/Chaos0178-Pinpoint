@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -14,8 +15,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 
 @Config
 @TeleOp(name = "arm", group = "TeleOp")
@@ -40,12 +43,12 @@ public class arm extends LinearOpMode {
 
     public static double rest;
 
-    public static double RESTING_POWER = 150;
-    public static double BASKET_POWER = 200;
-    public static double SPECIMEN_POWER = 150;
-    public static double COLLECTION_POWER = 150;
-    public static double Sliderpowerup = 2500;
-    public static double Sliderpowerdown = 1200;
+    public static double RESTING_VELOCITY = 150;
+    public static double BASKET_VELOCITY = 200;
+    public static double SPECIMEN_VELOCITY = 150;
+    public static double COLLECTION_VELOCITY = 150;
+    public static double Slidervelocityup = 2500;
+    public static double Slidervelocitydown = 1200;
     public static int resting_position = 50;
     public static int basket_position = 170;
     public static int specimen_position = 220;
@@ -63,7 +66,15 @@ public class arm extends LinearOpMode {
     public static int shoulder_bar_position = 170;
     public static double wrist_bar_position = 0.39;
     public static int shoulder_bar_velotity = 160;
-    double output;
+    public static double desired_claw_position;
+    public static int desired_shoulder_position;
+    public static double desired_shoulder_velocity;
+    public static double output;
+    public static int desired_slider_position;
+    public static double desired_slider_velocity;
+    public static double desired_wrist_position;
+
+
     IMU imu;
     DcMotor frontLeftMotor;
     DcMotor backLeftMotor;
@@ -116,14 +127,13 @@ public class arm extends LinearOpMode {
                 imu.resetYaw();
             }
             if(gamepad2.right_trigger > 0.01) {
-                output = Range.scale(gamepad2.right_trigger, 0.0, 1.0, 0.5, 0.99);
-                claw.setPosition(output);
+                desired_claw_position = Range.scale(gamepad2.right_trigger, 0.0, 1.0, 0.5, 0.99);
             }
             if(gamepad2.right_bumper && !changed){
                 if(open) {
-                    claw.setPosition(0.99);
+                    desired_claw_position = 0.99;
                 }else{
-                    claw.setPosition(0.5);
+                    desired_claw_position = 0.5;
                 }
                 changed = true;
                 open = !open;
@@ -133,11 +143,11 @@ public class arm extends LinearOpMode {
             if (gamepad2.right_stick_x> 0.01|| gamepad2.right_stick_x < -0.01)  {
                 int shoulder_position = Shoulder.getTargetPosition();
                 int shoulder_change = (int)gamepad2.right_stick_x * 10;
-                int shoulder_new_position = shoulder_position + shoulder_change;;
-                Shoulder.setTargetPosition(shoulder_new_position);
+                desired_shoulder_position = shoulder_position + shoulder_change;;
+
             }
 
-            wrist_position = gamepad2.left_stick_y;
+           // wrist_position = gamepad2.left_stick_y;
             if (gamepad2.y) { state = armState.RESTING; }
             if (gamepad2.x) { state = armState.BASKET; }
             if (gamepad2.a) { state = armState.SPECIMEN; }
@@ -146,26 +156,18 @@ public class arm extends LinearOpMode {
             if (gamepad2.dpad_right) { state = armState.below_bar; }
 
             if (gamepad2.dpad_up) {
-                SliderLeft.setTargetPosition(slidersup);
-                SliderRight.setTargetPosition(slidersup);
-                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderLeft.setVelocity(Sliderpowerup);
-                SliderRight.setVelocity(Sliderpowerup);
+                desired_slider_position = slidersup;
+                desired_slider_velocity =  Slidervelocityup;
+
+
             }
             if (gamepad2.dpad_down) {
-                SliderLeft.setTargetPosition(slidersdown);
-                SliderRight.setTargetPosition(slidersdown);
-                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderLeft.setVelocity(Sliderpowerdown);
-                SliderRight.setVelocity(Sliderpowerdown);
+                desired_slider_position=slidersdown;
+                desired_slider_velocity = Slidervelocitydown;
+
             }
 
-            if (sliderButton.isPressed()){
-                SliderLeft.setMotorDisable();
-                SliderRight.setMotorDisable();
-            }
+
             driving();
             if (gamepad1.a) { pointAtBasket(); }
             arm();
@@ -183,73 +185,56 @@ public class arm extends LinearOpMode {
         telemetry.addData("state", String.valueOf(state));
         switch (state){
             case RESTING:
-                Shoulder.setTargetPosition(resting_position);
-                Shoulder.setVelocity(RESTING_POWER);
-                wrist.setPosition(wristpos_resting);
-                SliderLeft.setTargetPosition(slidersdown);
-                SliderRight.setTargetPosition(slidersdown);
-                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderLeft.setVelocity(Sliderpowerdown);
-                SliderRight.setVelocity(Sliderpowerdown);
+                desired_shoulder_position = resting_position;
+                desired_shoulder_velocity = RESTING_VELOCITY;
+                desired_wrist_position = wristpos_resting;
+                desired_slider_position = slidersdown;
+                desired_slider_velocity = Slidervelocitydown;
                 break;
             case BASKET:
-                Shoulder.setTargetPosition(basket_position);
-                Shoulder.setVelocity(BASKET_POWER);
-                wrist.setPosition(wristpos_basket);
-                SliderLeft.setTargetPosition(slidersup);
-                SliderRight.setTargetPosition(slidersup);
-                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderLeft.setVelocity(Sliderpowerup);
-                SliderRight.setVelocity(Sliderpowerup);
+                desired_shoulder_position = basket_position;
+                desired_shoulder_velocity = BASKET_VELOCITY;
+                desired_wrist_position = wristpos_basket;
+                desired_slider_position = slidersup;
+                desired_slider_velocity = Slidervelocitydown;
                 break;
             case SPECIMEN:
-                Shoulder.setTargetPosition(specimen_position);
-                Shoulder.setVelocity(SPECIMEN_POWER);
-                wrist.setPosition(wristpos_specimen);
+                desired_shoulder_position = specimen_position;
+                desired_shoulder_velocity = SPECIMEN_VELOCITY;
+                desired_wrist_position = wristpos_specimen;
+                desired_slider_position = slidersdown;
+                desired_slider_velocity = Slidervelocitydown;
                 break;
             case COLLECTION:
-                Shoulder.setTargetPosition(collection_position);
-                Shoulder.setVelocity(COLLECTION_POWER);
-                wrist.setPosition(wristpos_collection);
+                desired_shoulder_position = collection_position;
+                desired_shoulder_velocity = COLLECTION_VELOCITY;
+                desired_wrist_position = wristpos_collection;
+                desired_slider_position = slidersdown;
+                desired_slider_velocity = Slidervelocitydown;
                 break;
             case above_bar:
-                Shoulder.setTargetPosition(shoulder_bar_position);
-                Shoulder.setVelocity(shoulder_bar_velotity);
-                wrist.setPosition(wrist_bar_position);
-                SliderLeft.setTargetPosition(slider_above_bar_position);
-                SliderRight.setTargetPosition(slider_above_bar_position);
-                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderLeft.setVelocity(Sliderpowerup);
-                SliderRight.setVelocity(Sliderpowerup);
+                desired_shoulder_position = shoulder_bar_position;
+                desired_shoulder_velocity = shoulder_bar_velotity;
+                desired_wrist_position = wrist_bar_position;
+                desired_slider_position = slider_above_bar_position;
+                desired_slider_velocity = Slidervelocityup;
                 break;
             case below_bar:
-                Shoulder.setTargetPosition(shoulder_bar_position);
-                Shoulder.setVelocity(shoulder_bar_velotity);
-                wrist.setPosition(wrist_bar_position);
-                SliderLeft.setTargetPosition(slider_below_bar_position);
-                SliderRight.setTargetPosition(slider_below_bar_position);
-                SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                SliderLeft.setVelocity(Sliderpowerdown);
-                SliderRight.setVelocity(Sliderpowerdown);
+                desired_shoulder_position = shoulder_bar_position;
+                desired_shoulder_velocity = shoulder_bar_velotity;
+                desired_wrist_position = wrist_bar_position;
+                desired_slider_position = slider_below_bar_position;
+                desired_slider_velocity = Slidervelocitydown;
                 break;
         }
-        Shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public void servo(Servo servo, double increment){
-        double position = servo.getPosition();
-        position = position + increment;
-        servo.setPosition(position);
-    }
     //driving is working, field centric
     private void pointAtBasket() {
        double pointedAtBasket = -45.0;
        pointAtAngle(pointedAtBasket);
     }
+
     private void pointAtAngle(double pointAt){
         double MAXPOWER = 0.5;
         double  Kp = 0.2;
@@ -288,11 +273,28 @@ public class arm extends LinearOpMode {
         frontRightPower = (rotY - rotX - rx) / denominator;
         backRightPower = (rotY + rotX - rx) / denominator;
     }
+
     public void action() {
         frontLeftMotor.setPower(frontLeftPower);
         backLeftMotor.setPower(backLeftPower);
         frontRightMotor.setPower(frontRightPower);
         backRightMotor.setPower(backRightPower);
+        wrist.setPosition(desired_wrist_position);
+        claw.setPosition(desired_claw_position);
+        Shoulder.setTargetPosition(desired_shoulder_position);
+        Shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Shoulder.setVelocity(desired_shoulder_velocity);
+        SliderLeft.setTargetPosition(desired_slider_position);
+        SliderRight.setTargetPosition(desired_slider_position);
+        SliderLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        SliderLeft.setVelocity(desired_slider_velocity);
+        SliderRight.setVelocity(desired_slider_velocity);
+        if (sliderButton.isPressed()){
+            SliderLeft.setMotorDisable();
+            SliderRight.setMotorDisable();
+        }
+
 
     }
 }
