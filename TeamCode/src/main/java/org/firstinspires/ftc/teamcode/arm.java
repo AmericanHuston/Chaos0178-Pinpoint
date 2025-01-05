@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -143,12 +142,9 @@ public class arm extends LinearOpMode {
             if (gamepad2.x) { state = armState.BASKET; }
             if (gamepad2.a) { state = armState.SPECIMEN; }
             if (gamepad2.b) { state = armState.COLLECTION; }
-            if (gamepad2.left_bumper) {
-                rest +=.01;
-            }
-            if (gamepad2.right_bumper) {
-                rest -=.01;
-            }
+            if (gamepad2.dpad_left) { state = armState.above_bar; }
+            if (gamepad2.dpad_right) { state = armState.below_bar; }
+
             if (gamepad2.dpad_up) {
                 SliderLeft.setTargetPosition(slidersup);
                 SliderRight.setTargetPosition(slidersup);
@@ -165,25 +161,15 @@ public class arm extends LinearOpMode {
                 SliderLeft.setVelocity(Sliderpowerdown);
                 SliderRight.setVelocity(Sliderpowerdown);
             }
-            if (gamepad2.dpad_left) {
-                state = armState.above_bar;
-            }
-            if (gamepad2.dpad_right) {
-                state = armState.below_bar;
-            }
+
             if (sliderButton.isPressed()){
                 SliderLeft.setMotorDisable();
                 SliderRight.setMotorDisable();
             }
-
             driving();
-
-            if (gamepad1.a) {
-                pointAtBasket();
-            }
+            if (gamepad1.a) { pointAtBasket(); }
             arm();
             action();
-            //slidersStop();
             telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles().getYaw());
             telemetry.addData("arm ticks", rest);
             telemetry.addData("Current ", Shoulder.getCurrent(CurrentUnit.AMPS));
@@ -206,7 +192,6 @@ public class arm extends LinearOpMode {
                 SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 SliderLeft.setVelocity(Sliderpowerdown);
                 SliderRight.setVelocity(Sliderpowerdown);
-
                 break;
             case BASKET:
                 Shoulder.setTargetPosition(basket_position);
@@ -251,15 +236,9 @@ public class arm extends LinearOpMode {
                 SliderLeft.setVelocity(Sliderpowerdown);
                 SliderRight.setVelocity(Sliderpowerdown);
                 break;
-
-
         }
-
-
         Shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
     }
-    //resting or normal mode
 
     public void servo(Servo servo, double increment){
         double position = servo.getPosition();
