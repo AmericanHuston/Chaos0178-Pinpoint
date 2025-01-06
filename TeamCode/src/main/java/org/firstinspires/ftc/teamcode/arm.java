@@ -53,10 +53,10 @@ public class arm extends LinearOpMode {
     public static int basket_position = 170;
     public static int specimen_position = 220;
     public static int collection_position = 410;
-    public static double wristpos_resting = 0.15;
-    public static double wristpos_basket = 0.6;
-    public static double wristpos_specimen = 0.8;
-    public static double wristpos_collection = 0.85;
+    //public static double wristpos_resting = 0.15;
+    //public static double wristpos_basket = 0.6;
+    //public static double wristpos_specimen = 0.8;
+    //public static double wristpos_collection = 0.85;
     public static int slidersdown = 40;
     public static int slidersup = 2800;
     public static double MAX_POS     =  1.0;     // Maximum rotational position
@@ -64,8 +64,9 @@ public class arm extends LinearOpMode {
     public static int slider_above_bar_position = 500;
     public static int slider_below_bar_position = 400;
     public static int shoulder_bar_position = 170;
-    public static double wrist_bar_position = 0.39;
+    //public static double wrist_bar_position = 0.39;
     public static int shoulder_bar_velotity = 160;
+    public static double kp = 0.2;
     public static double desired_claw_position;
     public static int desired_shoulder_position;
     public static double desired_shoulder_velocity;
@@ -83,7 +84,7 @@ public class arm extends LinearOpMode {
     Servo wrist;
     Servo claw;
     TouchSensor sliderButton;
-    public static double  wrist_position = (MAX_POS - MIN_POS) / 2;
+    //public static double  wrist_position = (MAX_POS - MIN_POS) / 2;
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -116,8 +117,10 @@ public class arm extends LinearOpMode {
         final double sliderSpeed = 0.35;
         state = armState.RESTING;
         claw.setPosition(0.5);
-        boolean open = true;
-        boolean changed = false;
+        boolean openClaw = true;
+        boolean changedClaw = false;
+        boolean openWrist = true;
+        boolean changedWrist = false;
 
 
         waitForStart();
@@ -129,16 +132,31 @@ public class arm extends LinearOpMode {
             if(gamepad2.right_trigger > 0.01) {
                 desired_claw_position = Range.scale(gamepad2.right_trigger, 0.0, 1.0, 0.5, 0.99);
             }
-            if(gamepad2.right_bumper && !changed){
-                if(open) {
+            if(gamepad2.right_bumper && !changedClaw){
+                if(openClaw) {
                     desired_claw_position = 0.99;
                 }else{
                     desired_claw_position = 0.5;
                 }
-                changed = true;
-                open = !open;
+                changedClaw = true;
+                openClaw = !openClaw;
             } else if (!gamepad2.right_bumper) {
-                changed = false;
+                changedClaw = false;
+            }
+
+            if(gamepad2.left_trigger > 0.01){
+                desired_wrist_position = 0.25;
+            }
+            if(gamepad2.left_bumper && !changedWrist){
+                if(openWrist) {
+                    desired_wrist_position = 0.5;
+                }else{
+                    desired_wrist_position = 0.1;
+                }
+                 changedWrist = true;
+                openWrist = !openWrist;
+            } else if (!gamepad2.left_bumper) {
+                changedWrist = false;
             }
             if (gamepad2.right_stick_x> 0.01|| gamepad2.right_stick_x < -0.01)  {
                 int shoulder_position = Shoulder.getTargetPosition();
@@ -187,42 +205,42 @@ public class arm extends LinearOpMode {
             case RESTING:
                 desired_shoulder_position = resting_position;
                 desired_shoulder_velocity = RESTING_VELOCITY;
-                desired_wrist_position = wristpos_resting;
+                //desired_wrist_position = wristpos_resting;
                 desired_slider_position = slidersdown;
                 desired_slider_velocity = Slidervelocitydown;
                 break;
             case BASKET:
                 desired_shoulder_position = basket_position;
                 desired_shoulder_velocity = BASKET_VELOCITY;
-                desired_wrist_position = wristpos_basket;
+                //desired_wrist_position = wristpos_basket;
                 desired_slider_position = slidersup;
                 desired_slider_velocity = Slidervelocitydown;
                 break;
             case SPECIMEN:
                 desired_shoulder_position = specimen_position;
                 desired_shoulder_velocity = SPECIMEN_VELOCITY;
-                desired_wrist_position = wristpos_specimen;
+                //desired_wrist_position = wristpos_specimen;
                 desired_slider_position = slidersdown;
                 desired_slider_velocity = Slidervelocitydown;
                 break;
             case COLLECTION:
                 desired_shoulder_position = collection_position;
                 desired_shoulder_velocity = COLLECTION_VELOCITY;
-                desired_wrist_position = wristpos_collection;
+                //desired_wrist_position = wristpos_collection;
                 desired_slider_position = slidersdown;
                 desired_slider_velocity = Slidervelocitydown;
                 break;
             case above_bar:
                 desired_shoulder_position = shoulder_bar_position;
                 desired_shoulder_velocity = shoulder_bar_velotity;
-                desired_wrist_position = wrist_bar_position;
+                //desired_wrist_position = wrist_bar_position;
                 desired_slider_position = slider_above_bar_position;
                 desired_slider_velocity = Slidervelocityup;
                 break;
             case below_bar:
                 desired_shoulder_position = shoulder_bar_position;
                 desired_shoulder_velocity = shoulder_bar_velotity;
-                desired_wrist_position = wrist_bar_position;
+                //desired_wrist_position = wrist_bar_position;
                 desired_slider_position = slider_below_bar_position;
                 desired_slider_velocity = Slidervelocitydown;
                 break;
@@ -237,7 +255,7 @@ public class arm extends LinearOpMode {
 
     private void pointAtAngle(double pointAt){
         double MAXPOWER = 0.5;
-        double  Kp = 0.2;
+        double  Kp = kp;
         double currentYaw = imu.getRobotYawPitchRollAngles().getYaw();
         double power = Kp *(pointAt - currentYaw);
         power = Range.clip(power, -MAXPOWER, MAXPOWER);
