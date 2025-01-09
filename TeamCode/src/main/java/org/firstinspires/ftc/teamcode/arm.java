@@ -61,7 +61,7 @@ public class arm extends LinearOpMode {
     public static int slidersup = 3500;
     public static double MAX_POS     =  1.0;     // Maximum rotational position
     public static double MIN_POS     =  0.0;// Minimum rotational position
-    public static int slider_above_bar_position = 500;
+    public static int slider_above_bar_position = 1050;
     public static int slider_below_bar_position = 400;
     public static int shoulder_bar_position = 170;
     //public static double wrist_bar_position = 0.39;
