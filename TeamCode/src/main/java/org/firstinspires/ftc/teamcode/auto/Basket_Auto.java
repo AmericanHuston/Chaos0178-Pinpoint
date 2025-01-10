@@ -159,7 +159,14 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
             state = armState.RESTING;
             arm();
             armAction();
+            sleep(2000);
+            drive(0.5, 0.0, 0.0);
+            driveAction(600);
+            sleep(300);
             //turn to blocks
+            drive(0.0, 0.0,0.5);
+            driveAction(300);
+            sleep(200);
             //grab block A
             //turn 180 degrees
             //raise sliders and tilt arm
