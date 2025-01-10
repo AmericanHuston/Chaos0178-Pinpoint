@@ -1,35 +1,43 @@
-package org.firstinspires.ftc.teamcode;
-
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.util.Range;
-
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.arm;
 
+import java.util.Locale;
 
-@Config
-@TeleOp(name = "arm", group = "TeleOp")
-public class arm extends LinearOpMode {
-    public DcMotorEx SliderLeft;
+@Autonomous(name = "Basket Auto", group="auto")
+public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
     public DcMotorEx SliderRight;
     public DcMotorEx Shoulder;
     double backRightPower;
     double frontRightPower;
     double frontLeftPower;
     double backLeftPower;
+    IMU imu;
+    DcMotor frontLeftMotor;
+    DcMotor backLeftMotor;
+    DcMotor frontRightMotor;
+    DcMotor backRightMotor;
+    Servo wrist;
+    Servo claw;
+    GoBildaPinpointDriverRR pinpoint;
+    TouchSensor sliderButton;
     enum armState{
         RESTING,
         BASKET,
@@ -53,10 +61,6 @@ public class arm extends LinearOpMode {
     public static int basket_position = 170;
     public static int specimen_position = 370;
     public static int collection_position = 500;
-    //public static double wristpos_resting = 0.15;
-    //public static double wristpos_basket = 0.6;
-    //public static double wristpos_specimen = 0.8;
-    //public static double wristpos_collection = 0.85;
     public static int slidersdown = 40;
     public static int slidersup = 3500;
     public static double MAX_POS     =  1.0;     // Maximum rotational position
@@ -64,7 +68,6 @@ public class arm extends LinearOpMode {
     public static int slider_above_bar_position = 1050;
     public static int slider_below_bar_position = 400;
     public static int shoulder_bar_position = 170;
-    //public static double wrist_bar_position = 0.39;
     public static int shoulder_bar_velotity = 200;
     public static double kp = 0.2;
     public static double desired_claw_position;
@@ -74,22 +77,16 @@ public class arm extends LinearOpMode {
     public static int desired_slider_position;
     public static double desired_slider_velocity;
     public static double desired_wrist_position;
-
-
-    IMU imu;
-    DcMotor frontLeftMotor;
-    DcMotor backLeftMotor;
-    DcMotor frontRightMotor;
-    DcMotor backRightMotor;
-    Servo wrist;
-    Servo claw;
-    TouchSensor sliderButton;
-    //public static double  wrist_position = (MAX_POS - MIN_POS) / 2;
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        //Don't edit code below this point
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
+        dashboard.updateConfig();
+        //Don't edit code above this point
 
-        imu = hardwareMap.get(IMU.class, "imu");
+        // Declare our motors
+        // Make sure your ID's match your configuration
         sliderButton = hardwareMap.touchSensor.get("sliderButton");
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
         backLeftMotor = hardwareMap.dcMotor.get("backLeft");
@@ -100,6 +97,8 @@ public class arm extends LinearOpMode {
         SliderLeft = hardwareMap.get(DcMotorEx.class, "SliderLeft");
         SliderRight = hardwareMap.get(DcMotorEx.class, "SliderRight");
         Shoulder = hardwareMap.get(DcMotorEx.class, "Shoulder");
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         Shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -107,98 +106,62 @@ public class arm extends LinearOpMode {
         SliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         SliderRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         SliderLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        SliderRight.setDirection(DcMotorSimple.Direction.REVERSE); //It needs to be reversed because...
+        SliderRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        // Retrieve the IMU from the hardware map
+        IMU imu = hardwareMap.get(IMU.class, "imu");
+        // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
+        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        final double sliderSpeed = 0.35;
+        imu.resetYaw();
         state = armState.RESTING;
-        claw.setPosition(0.5);
-        boolean openClaw = true;
-        boolean changedClaw = false;
-        boolean openWrist = true;
-        boolean changedWrist = false;
+        //start with claw closed
+        claw.setPosition(0.99);
 
+
+        pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class,"pinpoint");
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD.ordinal());
+        //pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pinpoint.resetPosAndIMU();
 
         waitForStart();
 
-        while(opModeIsActive()){
-            if (gamepad1.back) {
-                imu.resetYaw();
-            }
-            if(gamepad2.right_trigger > 0.01) {
-                desired_claw_position = Range.scale(gamepad2.right_trigger, 0.0, 1.0, 0.5, 0.99);
-            }
-            if(gamepad2.right_bumper && !changedClaw){
-                if(openClaw) {
-                    desired_claw_position = 0.99;
-                }else{
-                    desired_claw_position = 0.5;
-                }
-                changedClaw = true;
-                openClaw = !openClaw;
-            } else if (!gamepad2.right_bumper) {
-                changedClaw = false;
-            }
-
-            if(gamepad2.left_trigger > 0.01){
-                desired_wrist_position = 0.25;
-            }
-            if(gamepad2.left_bumper && !changedWrist){
-                if(openWrist) {
-                    desired_wrist_position = 0.5;
-                }else{
-                    desired_wrist_position = 0.1;
-                }
-                 changedWrist = true;
-                openWrist = !openWrist;
-            } else if (!gamepad2.left_bumper) {
-                changedWrist = false;
-            }
-            if (gamepad2.right_stick_x> 0.01|| gamepad2.right_stick_x < -0.01)  {
-                int shoulder_position = Shoulder.getTargetPosition();
-                int shoulder_change = (int)gamepad2.right_stick_x * 10;
-                desired_shoulder_position = shoulder_position + shoulder_change;;
-
-            }
-
-           // wrist_position = gamepad2.left_stick_y;
-            if (gamepad2.y) { state = armState.RESTING; }
-            if (gamepad2.x) { state = armState.BASKET; }
-            if (gamepad2.a) { state = armState.SPECIMEN; }
-            if (gamepad2.b) { state = armState.COLLECTION; }
-            if (gamepad2.dpad_left) { state = armState.above_bar; }
-            if (gamepad2.dpad_right) { state = armState.below_bar; }
-
-            if (gamepad2.dpad_up) {
-                desired_slider_position = slidersup;
-                desired_slider_velocity =  Slidervelocityup;
-
-
-            }
-            if (gamepad2.dpad_down) {
-                desired_slider_position=slidersdown;
-                desired_slider_velocity = Slidervelocitydown;
-
-            }
-
-
-            driving();
-            if (gamepad1.a) { pointAtBasket(); }
+        while (opModeIsActive()) {
+            //raise sliders
+            //tilt arm
+            state = armState.BASKET;
             arm();
-            action();
-            telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles().getYaw());
-            telemetry.addData("arm ticks", rest);
-            telemetry.addData("Current ", Shoulder.getCurrent(CurrentUnit.AMPS));
-            telemetry.addData("ClawPos", output);
+            armAction();
+            //move forward
+            drive(0.0, -0.5, 0.0);
+            driveAction(400);
+            //open claw
+            //lower sliders and arm
+            //turn to blocks
+            //grab block A
+            //turn 180 degrees
+            //raise sliders and tilt arm
+            //drive to the basket
+            //rotate to match basket orientation
+            //open claw
+            //back up
+            //lower sliders
+            //drive to submersible
+            //park
+            pinpoint.update();
+            Pose2D pos = pinpoint.getPosition();
+            String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
+            telemetry.addData("Position", data);
+
+            // Wait for 5 seconds
+            sleep(5000);
+
             telemetry.update();
         }
     }
-
-   //sets shoulder motor position need the right presets
+    //sets shoulder motor position need the right presets
     public void arm(){
         telemetry.addData("state", String.valueOf(state));
         switch (state){
@@ -245,57 +208,7 @@ public class arm extends LinearOpMode {
                 break;
         }
     }
-
-    //driving is working, field centric
-    private void pointAtBasket() {
-       double pointedAtBasket = -45.0;
-       pointAtAngle(pointedAtBasket);
-    }
-
-    private void pointAtAngle(double pointAt){
-        double MAXPOWER = 0.5;
-        double  Kp = kp;
-        double currentYaw = imu.getRobotYawPitchRollAngles().getYaw();
-        double power = Kp *(pointAt - currentYaw);
-        power = Range.clip(power, -MAXPOWER, MAXPOWER);
-        backLeftPower = power;
-        frontLeftPower = power;
-        backRightPower  = -power;
-        frontRightPower = -power;
-    }
-    public void driving() {
-        double y = -gamepad1.left_stick_y / 2; // Remember, Y stick value is reversed
-        double x = gamepad1.left_stick_x / 2;
-        double rx = gamepad1.right_stick_x / 2;
-        if (gamepad1.right_trigger >= 0.01) {
-            y = y * 2;
-            x = x * 2;
-            rx = rx * 2;
-        }
-        //speed up/slow down
-        if (gamepad1.left_trigger >= 0.01) {
-            y = y / 2;
-            x = x / 2;
-            rx = rx / 2;
-        }
-        //When dpad down is pressed it will point at basket
-
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-        rotX = rotX * 1.1;
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        frontLeftPower = (rotY + rotX + rx) / denominator;
-        backLeftPower = (rotY - rotX + rx) / denominator;
-        frontRightPower = (rotY - rotX - rx) / denominator;
-        backRightPower = (rotY + rotX - rx) / denominator;
-    }
-
-    public void action() {
-        frontLeftMotor.setPower(frontLeftPower);
-        backLeftMotor.setPower(backLeftPower);
-        frontRightMotor.setPower(frontRightPower);
-        backRightMotor.setPower(backRightPower);
+    public void armAction() {
         wrist.setPosition(desired_wrist_position);
         claw.setPosition(desired_claw_position);
         Shoulder.setTargetPosition(desired_shoulder_position);
@@ -313,5 +226,53 @@ public class arm extends LinearOpMode {
         }
 
 
+    }
+    public void driveAction(int time_in_ms) {
+        frontLeftMotor.setPower(frontLeftPower);
+        backLeftMotor.setPower(backLeftPower);
+        frontRightMotor.setPower(frontRightPower);
+        backRightMotor.setPower(backRightPower);
+
+        sleep(time_in_ms);
+
+        frontLeftMotor.setPower(0.0);
+        backLeftMotor.setPower(0.0);
+        frontRightMotor.setPower(0.0);
+        backRightMotor.setPower(0.0);
+    }
+    public void drive(double x, double y, double rx){
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+        // Rotate the movement direction counter to the bot's rotation
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+        rotX = rotX * 1.1;  // Counteract imperfect strafing
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        frontLeftPower = (rotY + rotX + rx) / denominator;
+        backLeftPower = (rotY - rotX + rx) / denominator;
+        frontRightPower = (rotY - rotX - rx) / denominator;
+        backRightPower = (rotY + rotX - rx) / denominator;
+    }
+    public void driveActionDistance(double centimeters) {
+        Pose2D position = pinpoint.getPosition();
+        double startingY = position.getY(DistanceUnit.CM);
+        while(startingY - position.getY(DistanceUnit.CM) > Math.abs(centimeters)) {
+            frontLeftMotor.setPower(frontLeftPower);
+            backLeftMotor.setPower(backLeftPower);
+            frontRightMotor.setPower(frontRightPower);
+            backRightMotor.setPower(backRightPower);
+        }
+
+
+
+        frontLeftMotor.setPower(0.0);
+        backLeftMotor.setPower(0.0);
+        frontRightMotor.setPower(0.0);
+        backRightMotor.setPower(0.0);
     }
 }
