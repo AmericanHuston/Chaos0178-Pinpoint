@@ -36,7 +36,9 @@ public class arm extends LinearOpMode {
         SPECIMEN,
         COLLECTION,
         above_bar,
-        below_bar
+        below_bar,
+        prehang,
+        posthang
 
     }
     armState state;
@@ -47,6 +49,7 @@ public class arm extends LinearOpMode {
     public static double BASKET_VELOCITY = 200;
     public static double SPECIMEN_VELOCITY = 210;
     public static double COLLECTION_VELOCITY = 210;
+    public static int hangHeight = 2500;
     public static double Slidervelocityup = 2500;
     public static double Slidervelocitydown = 1200;
     public static int resting_position = 50;
@@ -172,18 +175,8 @@ public class arm extends LinearOpMode {
             if (gamepad2.b) { state = armState.COLLECTION; }
             if (gamepad2.dpad_left) { state = armState.above_bar; }
             if (gamepad2.dpad_right) { state = armState.below_bar; }
-
-            if (gamepad2.dpad_up) {
-                desired_slider_position = slidersup;
-                desired_slider_velocity =  Slidervelocityup;
-
-
-            }
-            if (gamepad2.dpad_down) {
-                desired_slider_position=slidersdown;
-                desired_slider_velocity = Slidervelocitydown;
-
-            }
+            if (gamepad2.dpad_up) { state = armState.prehang; }
+            if (gamepad2.dpad_down) { state = armState.posthang; }
 
 
             driving();
@@ -242,6 +235,16 @@ public class arm extends LinearOpMode {
                 //desired_wrist_position = wrist_bar_position;
                 desired_slider_position = slider_below_bar_position;
                 desired_slider_velocity = Slidervelocitydown;
+                break;
+            case prehang:
+                desired_shoulder_position = resting_position;
+                desired_shoulder_velocity = shoulder_bar_velotity;
+                desired_slider_position = hangHeight;
+                desired_slider_velocity = Slidervelocityup;
+                break;
+            case posthang:
+                desired_slider_position = resting_position;
+                desired_slider_velocity = Slidervelocityup;
                 break;
         }
     }
