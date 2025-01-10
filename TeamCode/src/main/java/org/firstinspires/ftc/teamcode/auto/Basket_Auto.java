@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -22,6 +23,7 @@ import org.firstinspires.ftc.teamcode.arm;
 import java.util.Locale;
 
 @Autonomous(name = "Basket Auto", group="auto")
+@Config
 public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
     public DcMotorEx SliderRight;
     public DcMotorEx Shoulder;
@@ -51,6 +53,12 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
 
     public static double rest;
 
+    final double CLAW_OPEN = 0.5;
+    final double CLAW_CLOSED = 0.99;
+
+    public static int MS_FOR_BACKDRIVE = 450;
+    public static int MS_FOR_FORWARDDRIVE = 470;
+    public static int driveForwardTime = 6000;
     public static double RESTING_VELOCITY = 200;
     public static double BASKET_VELOCITY = 200;
     public static double SPECIMEN_VELOCITY = 210;
@@ -76,7 +84,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
     public static double output;
     public static int desired_slider_position;
     public static double desired_slider_velocity;
-    public static double desired_wrist_position;
+    public static double desired_wrist_position = 0.5;
     @Override
     public void runOpMode() throws InterruptedException {
         //Don't edit code below this point
@@ -108,7 +116,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
         SliderLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         SliderRight.setDirection(DcMotorSimple.Direction.REVERSE);
         // Retrieve the IMU from the hardware map
-        IMU imu = hardwareMap.get(IMU.class, "imu");
+        imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
@@ -116,29 +124,41 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
         imu.resetYaw();
-        state = armState.RESTING;
-        //start with claw closed
-        claw.setPosition(0.99);
-
-
         pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class,"pinpoint");
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD.ordinal());
         //pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
 
+        state = armState.RESTING;
+        arm();
+        desired_claw_position = CLAW_CLOSED;
+        armAction();
+        //start with claw closed
+
         waitForStart();
 
         while (opModeIsActive()) {
-            //raise sliders
-            //tilt arm
+            //raise sliders DONE
+            //tilt arm DONE
             state = armState.BASKET;
             arm();
             armAction();
-            //move forward
+            sleep(driveForwardTime);
+            //move forward DONE
             drive(0.0, -0.5, 0.0);
-            driveAction(400);
+            driveAction(MS_FOR_FORWARDDRIVE);
+            sleep(1000);
             //open claw
+            arm();
+            desired_claw_position = CLAW_OPEN;
+            armAction();
+            sleep(200);
+            drive(0.0, 0.5, 0.0);
+            driveAction(MS_FOR_BACKDRIVE);
             //lower sliders and arm
+            state = armState.RESTING;
+            arm();
+            armAction();
             //turn to blocks
             //grab block A
             //turn 180 degrees
@@ -156,7 +176,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
             telemetry.addData("Position", data);
 
             // Wait for 5 seconds
-            sleep(5000);
+            sleep(30000);
 
             telemetry.update();
         }
@@ -261,7 +281,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
     public void driveActionDistance(double centimeters) {
         Pose2D position = pinpoint.getPosition();
         double startingY = position.getY(DistanceUnit.CM);
-        while(startingY - position.getY(DistanceUnit.CM) > Math.abs(centimeters)) {
+        while(Math.abs(startingY - position.getY(DistanceUnit.CM)) > Math.abs(centimeters)) {
             frontLeftMotor.setPower(frontLeftPower);
             backLeftMotor.setPower(backLeftPower);
             frontRightMotor.setPower(frontRightPower);
