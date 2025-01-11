@@ -128,7 +128,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD.ordinal());
         //pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
-        wrist.setPosition(0.1);
+        wrist.setPosition(0.5);
 
         state = armState.RESTING;
         arm();
@@ -161,12 +161,12 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
             arm();
             armAction();
             sleep(2000);
-            drive(0.5, 0.0, 0.0);
+            drive(-0.5, 0.0, 0.0);
             driveAction(600);
             sleep(300);
             //turn to blocks
             drive(0.0, 0.0,0.5);
-            driveAction(300);
+            driveAction(700);
             sleep(200);
             //grab block A
             //turn 180 degrees
@@ -182,7 +182,13 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
             Pose2D pos = pinpoint.getPosition();
             String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
             telemetry.addData("Position", data);
-
+            frontLeftMotor.setPower(0.0);
+            backLeftMotor.setPower(0.0);
+            frontRightMotor.setPower(0.0);
+            backRightMotor.setPower(0.0);
+            SliderLeft.setPower(0.0);
+            SliderRight.setPower(0.0);
+            Shoulder.setPower(0.0);
             // Wait for 5 seconds
             sleep(30000);
 
@@ -204,7 +210,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
                 desired_shoulder_velocity = BASKET_VELOCITY;
                 //desired_wrist_position = wristpos_basket;
                 desired_slider_position = slidersup;
-                desired_slider_velocity = Slidervelocitydown;
+                desired_slider_velocity = Slidervelocityup;
                 break;
             case SPECIMEN:
                 desired_shoulder_position = specimen_position;
@@ -248,10 +254,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
         SliderRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         SliderLeft.setVelocity(desired_slider_velocity);
         SliderRight.setVelocity(desired_slider_velocity);
-        if (sliderButton.isPressed()){
-            SliderLeft.setMotorDisable();
-            SliderRight.setMotorDisable();
-        }
+
 
 
     }

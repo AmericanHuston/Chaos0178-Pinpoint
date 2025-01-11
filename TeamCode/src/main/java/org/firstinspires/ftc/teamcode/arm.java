@@ -179,10 +179,11 @@ public class arm extends LinearOpMode {
             if (gamepad2.dpad_up) { state = armState.prehang; }
             if (gamepad2.dpad_down) { state = armState.posthang; }
 
-
             driving();
             if (gamepad1.a) { pointAtBasket(); }
             arm();
+            if (gamepad1.dpad_up) { sliderMove(50);}
+            if (gamepad1.dpad_down) {sliderMove(-50);}
             action();
             telemetry.addData("Yaw", imu.getRobotYawPitchRollAngles().getYaw());
             telemetry.addData("arm ticks", rest);
@@ -192,7 +193,12 @@ public class arm extends LinearOpMode {
         }
     }
 
-   //sets shoulder motor position need the right presets
+    public void sliderMove(int moveTickAmount){
+        if (state == armState.prehang) {
+            hangHeight += moveTickAmount;
+        }
+    }
+    //sets shoulder motor position need the right presets
     public void arm(){
         telemetry.addData("state", String.valueOf(state));
         switch (state){
