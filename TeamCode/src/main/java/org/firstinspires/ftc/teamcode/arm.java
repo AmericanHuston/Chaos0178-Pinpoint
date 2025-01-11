@@ -120,6 +120,7 @@ public class arm extends LinearOpMode {
         final double sliderSpeed = 0.35;
         state = armState.RESTING;
         claw.setPosition(0.5);
+        wrist.setPosition(0.1);
         boolean openClaw = true;
         boolean changedClaw = false;
         boolean openWrist = true;

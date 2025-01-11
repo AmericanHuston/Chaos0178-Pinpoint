@@ -128,6 +128,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD.ordinal());
         //pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
+        wrist.setPosition(0.1);
 
         state = armState.RESTING;
         arm();

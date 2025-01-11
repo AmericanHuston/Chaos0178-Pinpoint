@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -19,6 +21,7 @@ import java.util.Locale;
 
 @Autonomous(name = "AutoPark", group="TeleOp")
 public class AutoPark extends LinearOpMode {
+    Servo wrist;
     @Override
     public void runOpMode() throws InterruptedException {
         //Don't edit code below this point
@@ -34,6 +37,7 @@ public class AutoPark extends LinearOpMode {
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
+        wrist = hardwareMap.get(Servo.class, "wrist");
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
@@ -50,6 +54,7 @@ public class AutoPark extends LinearOpMode {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
         imu.resetYaw();
+        wrist.setPosition(0.1);
 
 
         odo = hardwareMap.get(GoBildaPinpointDriverRR.class,"pinpoint");
