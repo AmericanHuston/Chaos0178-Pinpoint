@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.RobotBoard;
 
 import static android.os.SystemClock.sleep;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static org.firstinspires.ftc.teamcode.RobotBoard.LocalUtils.*;
 
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
@@ -90,7 +89,7 @@ public class Board0 {
     int desired_slider_position;
     double desired_slider_velocity;
     double desired_wrist_position = 0.5;
-    Board0(){}
+
     public void init(HardwareMap hw){
         imu = hw.get(IMU.class, "imu");
         sliderButton = hw.touchSensor.get("sliderButton");
