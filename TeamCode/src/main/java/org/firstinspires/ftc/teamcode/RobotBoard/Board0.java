@@ -16,9 +16,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Board0 {
 
     //Initialization:
-    public DcMotorEx SliderLeft;
-    public DcMotorEx SliderRight;
-    public DcMotorEx Shoulder;
+    DcMotorEx SliderLeft;
+    DcMotorEx SliderRight;
+    DcMotorEx Shoulder;
     IMU imu;
     DcMotor frontLeftMotor;
     DcMotor backLeftMotor;
@@ -56,37 +56,37 @@ public class Board0 {
     clawPositions clawState;
     drivingDirection driveState;
 
-    private final static double CLAW_OPEN = 0.5;
-    private final static double CLAW_CLOSED = 0.99;
+    final static double CLAW_OPEN = 0.5;
+    final static double CLAW_CLOSED = 0.99;
 
     double backRightPower;
     double frontRightPower;
     double frontLeftPower;
     double backLeftPower;
-    volatile int driveTimeInMs;
-    public double driveSpeed;
-    public static double RESTING_VELOCITY = 200;
-    public static double BASKET_VELOCITY = 200;
-    public static double SPECIMEN_VELOCITY = 210;
-    public static double COLLECTION_VELOCITY = 210;
-    public static double slider_velocity_up = 2500;
-    public static double slider_velocity_down = 1200;
-    public static int resting_position = 50;
-    public static int basket_position = 170;
-    public static int specimen_position = 370;
-    public static int collection_position = 500;
-    public static int sliders_down = 40;
-    public static int sliders_up = 3500;
-    public static int slider_above_bar_position = 1050;
-    public static int slider_below_bar_position = 400;
-    public static int shoulder_bar_position = 170;
-    public static int shoulder_bar_velocity = 200;
-    public static double desired_claw_position;
-    public static int desired_shoulder_position;
-    public static double desired_shoulder_velocity;
-    public static int desired_slider_position;
-    public static double desired_slider_velocity;
-    public static double desired_wrist_position = 0.5;
+    int driveTimeInMs;
+    double driveSpeed;
+    double RESTING_VELOCITY = 200;
+    double BASKET_VELOCITY = 200;
+    double SPECIMEN_VELOCITY = 210;
+    double COLLECTION_VELOCITY = 210;
+    double slider_velocity_up = 2500;
+    double slider_velocity_down = 1200;
+    int resting_position = 50;
+    int basket_position = 170;
+    int specimen_position = 370;
+    int collection_position = 500;
+    int sliders_down = 40;
+    int sliders_up = 3500;
+    int slider_above_bar_position = 1050;
+    int slider_below_bar_position = 400;
+    int shoulder_bar_position = 170;
+    int shoulder_bar_velocity = 200;
+    double desired_claw_position;
+    int desired_shoulder_position;
+    double desired_shoulder_velocity;
+    int desired_slider_position;
+    double desired_slider_velocity;
+    double desired_wrist_position = 0.5;
 
     public void setArmState(armStates armState){
         this.armState = armState;
@@ -196,7 +196,21 @@ public class Board0 {
         }
     }
 
-    //Only for manual here... used internally
+    public void stateMachinesThink(stateMachineAct stateMachine){
+        switch (stateMachine){
+            case CLAW:
+                stateMachineClaw();
+                break;
+            case DRIVE:
+                stateMachineDrive();
+                break;
+            case ARM:
+                stateMachineArm();
+                break;
+        }
+    }
+
+    //Not intended for manual here... used internally
     public void drive(double x, double y, double rx){
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
@@ -216,7 +230,7 @@ public class Board0 {
         backRightPower = (rotY + rotX - rx) / denominator;
     }
 
-    public void driveStateMachine(){
+    private void stateMachineDrive(){
         double speed = clamp(0.0, 1.0, driveSpeed);
         switch (driveState){
             case FORWARD:
