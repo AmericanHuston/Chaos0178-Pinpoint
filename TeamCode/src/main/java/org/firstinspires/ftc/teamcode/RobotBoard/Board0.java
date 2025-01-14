@@ -94,8 +94,6 @@ public class Board0 {
     double desired_wrist_position = 0.5;
 
     Board0(HardwareMap hardwareMap){
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
         imu = hardwareMap.get(IMU.class, "imu");
         sliderButton = hardwareMap.touchSensor.get("sliderButton");
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
