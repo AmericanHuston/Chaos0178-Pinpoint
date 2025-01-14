@@ -28,7 +28,7 @@ public class Board0 {
     Servo claw;
     GoBildaPinpointDriverRR pinpoint;
     TouchSensor sliderButton;
-    public enum armState{
+    public enum armStates {
         RESTING,
         BASKET,
         SPECIMEN,
@@ -52,7 +52,7 @@ public class Board0 {
         CLAW,
         DRIVE
     }
-    armState armState;
+    armStates armState;
     clawPositions clawState;
     drivingDirection driveState;
 
@@ -88,11 +88,11 @@ public class Board0 {
     public static double desired_slider_velocity;
     public static double desired_wrist_position = 0.5;
 
-    public void setArmState(armState armState){
+    public void setArmState(armStates armState){
         this.armState = armState;
     }
 
-    public armState getArmState() {
+    public armStates getArmState() {
         return this.armState;
     }
 

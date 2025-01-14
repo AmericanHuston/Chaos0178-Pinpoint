@@ -18,6 +18,11 @@ public class Board0UsageExample extends LinearOpMode {
             board.stateMachinesAct(Board0.stateMachineAct.CLAW);
             sleep(1000);
             board.setClawState(Board0.clawPositions.CLAW_CLOSED);
+            board.stateMachinesAct(Board0.stateMachineAct.CLAW);
+            board.setArmState(Board0.armStates.BELOW_BAR);
+            board.stateMachinesAct(Board0.stateMachineAct.ARM);
+            board.setArmState(Board0.armStates.RESTING);
+            board.stateMachinesAct(Board0.stateMachineAct.ARM);
             requestOpModeStop();
         }
     }
