@@ -93,18 +93,18 @@ public class Board0 {
     double desired_slider_velocity;
     double desired_wrist_position = 0.5;
 
-    Board0(HardwareMap hardwareMap){
-        imu = hardwareMap.get(IMU.class, "imu");
-        sliderButton = hardwareMap.touchSensor.get("sliderButton");
-        frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
-        backLeftMotor = hardwareMap.dcMotor.get("backLeft");
-        frontRightMotor = hardwareMap.dcMotor.get("frontRight");
-        backRightMotor = hardwareMap.dcMotor.get("backRight");
-        claw = hardwareMap.get(Servo.class, "claw");
-        wrist = hardwareMap.get(Servo.class, "wrist");
-        SliderLeft = hardwareMap.get(DcMotorEx.class, "SliderLeft");
-        SliderRight = hardwareMap.get(DcMotorEx.class, "SliderRight");
-        Shoulder = hardwareMap.get(DcMotorEx.class, "Shoulder");
+    Board0(HardwareMap hw){
+        imu = hw.get(IMU.class, "imu");
+        sliderButton = hw.touchSensor.get("sliderButton");
+        frontLeftMotor = hw.dcMotor.get("frontLeft");
+        backLeftMotor = hw.dcMotor.get("backLeft");
+        frontRightMotor = hw.dcMotor.get("frontRight");
+        backRightMotor = hw.dcMotor.get("backRight");
+        claw = hw.get(Servo.class, "claw");
+        wrist = hw.get(Servo.class, "wrist");
+        SliderLeft = hw.get(DcMotorEx.class, "SliderLeft");
+        SliderRight = hw.get(DcMotorEx.class, "SliderRight");
+        Shoulder = hw.get(DcMotorEx.class, "Shoulder");
         Shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
