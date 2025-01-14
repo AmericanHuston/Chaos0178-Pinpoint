@@ -4,9 +4,14 @@ import static android.os.SystemClock.sleep;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static org.firstinspires.ftc.teamcode.RobotBoard.LocalUtils.*;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -87,6 +92,36 @@ public class Board0 {
     int desired_slider_position;
     double desired_slider_velocity;
     double desired_wrist_position = 0.5;
+
+    Board0(HardwareMap hardwareMap){
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        imu = hardwareMap.get(IMU.class, "imu");
+        sliderButton = hardwareMap.touchSensor.get("sliderButton");
+        frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
+        backLeftMotor = hardwareMap.dcMotor.get("backLeft");
+        frontRightMotor = hardwareMap.dcMotor.get("frontRight");
+        backRightMotor = hardwareMap.dcMotor.get("backRight");
+        claw = hardwareMap.get(Servo.class, "claw");
+        wrist = hardwareMap.get(Servo.class, "wrist");
+        SliderLeft = hardwareMap.get(DcMotorEx.class, "SliderLeft");
+        SliderRight = hardwareMap.get(DcMotorEx.class, "SliderRight");
+        Shoulder = hardwareMap.get(DcMotorEx.class, "Shoulder");
+        Shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        SliderLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        SliderRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        SliderRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        SliderLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        SliderRight.setDirection(DcMotorSimple.Direction.REVERSE); //It needs to be reversed because...
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP));
+        imu.initialize(parameters);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
 
     public void setArmState(armStates armState){
         this.armState = armState;

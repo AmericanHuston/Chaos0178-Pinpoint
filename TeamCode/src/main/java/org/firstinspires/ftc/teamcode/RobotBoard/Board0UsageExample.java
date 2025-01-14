@@ -2,10 +2,11 @@ package org.firstinspires.ftc.teamcode.RobotBoard;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Autonomous(name= "Board0UsageExample", group="TeleOp")
 public class Board0UsageExample extends LinearOpMode {
-    Board0 board = new Board0();
+    Board0 board = new Board0(hardwareMap);
     public void runOpMode(){
         waitForStart();
         while (opModeIsActive()) {
