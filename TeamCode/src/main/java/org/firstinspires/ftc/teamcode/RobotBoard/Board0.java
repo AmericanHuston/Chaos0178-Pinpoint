@@ -263,10 +263,10 @@ public class Board0 {
         double speed = clamp(0.0, 1.0, driveSpeed);
         switch (driveState){
             case FORWARD:
-                drive(speed, 0.0, 0.0);
+                drive(-speed, 0.0, 0.0);
                 break;
             case BACKWARD:
-                drive(-speed, 0.0, 0.0);
+                drive(speed, 0.0, 0.0);
                 break;
             case LEFT:
                 drive(0.0, speed, 0.0);

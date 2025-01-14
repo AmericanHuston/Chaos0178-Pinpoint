@@ -17,10 +17,9 @@ public class Board0UsageExample extends LinearOpMode {
             board.setDriveTime(1000);
             board.stateMachinesThink(Board0.stateMachineAct.DRIVE);
             board.stateMachinesAct(Board0.stateMachineAct.DRIVE);
-            //Should drive straight for 1 second at half speed
-            board.setClawState(Board0.clawPositions.CLAW_OPEN);
-            board.stateMachinesThink(Board0.stateMachineAct.CLAW);
-            board.stateMachinesAct(Board0.stateMachineAct.CLAW);
+            board.setClawState(Board0.clawPositions.CLAW_OPEN); //Set the claw to open once act is called
+            board.stateMachinesThink(Board0.stateMachineAct.CLAW); //Think about it
+            board.stateMachinesAct(Board0.stateMachineAct.CLAW);//Do it
             sleep(1000);
             board.setClawState(Board0.clawPositions.CLAW_CLOSED);
             board.stateMachinesThink(Board0.stateMachineAct.CLAW);
