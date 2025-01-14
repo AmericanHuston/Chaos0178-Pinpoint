@@ -162,7 +162,6 @@ public class Board0 {
     }
 
     public void stateMachineArm(){
-        telemetry.addData("state", String.valueOf(armState));
         switch (armState) {
             case RESTING:
                 desired_shoulder_position = resting_position;
