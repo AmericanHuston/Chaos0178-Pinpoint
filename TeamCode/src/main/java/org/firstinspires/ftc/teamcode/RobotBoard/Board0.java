@@ -56,8 +56,8 @@ public class Board0 {
     clawPositions clawState;
     drivingDirection driveState;
 
-    final static double CLAW_OPEN = 0.5;
-    final static double CLAW_CLOSED = 0.99;
+    private final static double CLAW_OPEN = 0.5;
+    private final static double CLAW_CLOSED = 0.99;
 
     double backRightPower;
     double frontRightPower;
