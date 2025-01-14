@@ -18,13 +18,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
-import org.firstinspires.ftc.teamcode.arm;
 
 import java.util.Locale;
 
-@Autonomous(name = "Basket Auto", group="auto")
+@Autonomous(name = "SpecimenAuto", group="auto")
 @Config
-public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
+public class SpecimenAuto extends LinearOpMode {    public DcMotorEx SliderLeft;
     public DcMotorEx SliderRight;
     public DcMotorEx Shoulder;
     double backRightPower;
@@ -57,7 +56,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
     final double CLAW_CLOSED = 0.99;
 
     public static int MS_FOR_BACKDRIVE = 450;
-    public static int MS_FOR_FORWARDDRIVE = 470;
+    public static int MS_FOR_FORWARDDRIVE = 600;
     public static int driveForwardTime = 6000;
     public static double RESTING_VELOCITY = 200;
     public static double BASKET_VELOCITY = 200;
@@ -141,7 +140,7 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
             //start with claw closed
             //raise sliders DONE
             //tilt arm DONE
-            state = armState.BASKET;
+            state = armState.above_bar;
             arm();
             armAction();
             sleep(driveForwardTime);
@@ -150,24 +149,22 @@ public class Basket_Auto extends LinearOpMode {    public DcMotorEx SliderLeft;
             driveAction(MS_FOR_FORWARDDRIVE);
             sleep(1000);
             //open claw
+            state = armState.below_bar;
             arm();
+            armAction();
+            sleep(1000);
             desired_claw_position = CLAW_OPEN;
             armAction();
-            sleep(200);
+            sleep(1000);
             drive(0.0, 0.5, 0.0);
             driveAction(MS_FOR_BACKDRIVE);
             //lower sliders and arm
             state = armState.RESTING;
             arm();
             armAction();
-            sleep(2000);
-            drive(-0.5, 0.0, 0.0);
-            driveAction(600);
-            sleep(300);
-            //turn to blocks
-            drive(0.0, 0.0,0.5);
-            driveAction(700);
-            sleep(200);
+            sleep(100);
+            drive(-0.5, 0.0,0.0);
+            driveAction(2000);
             //grab block A
             //turn 180 degrees
             //raise sliders and tilt arm
