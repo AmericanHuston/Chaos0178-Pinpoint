@@ -160,7 +160,6 @@ public class Board0 {
     }
 
     public void stateMachineArm(){
-        telemetry.addData("state", String.valueOf(armState));
         switch (armState) {
             case RESTING:
                 desired_shoulder_position = resting_position;
@@ -224,6 +223,7 @@ public class Board0 {
                 claw.setPosition(desired_claw_position);
             case DRIVE:
                 driveAction(driveTimeInMs);
+                break;
         }
     }
 
@@ -265,16 +265,16 @@ public class Board0 {
         double speed = clamp(0.0, 1.0, driveSpeed);
         switch (driveState){
             case FORWARD:
-                drive(speed, 0.0, 0.0);
+                drive(0.0, -speed, 0.0);
                 break;
             case BACKWARD:
-                drive(-speed, 0.0, 0.0);
-                break;
-            case LEFT:
                 drive(0.0, speed, 0.0);
                 break;
+            case LEFT:
+                drive(-speed, 0.0, 0.0);
+                break;
             case RIGHT:
-                drive(0.0, -speed, 0.0);
+                drive(speed, 0.0, 0.0);
                 break;
         }
     }

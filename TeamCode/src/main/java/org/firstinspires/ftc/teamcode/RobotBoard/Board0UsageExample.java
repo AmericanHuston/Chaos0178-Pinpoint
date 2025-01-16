@@ -11,7 +11,6 @@ public class Board0UsageExample extends LinearOpMode {
         board.init(hardwareMap);
         waitForStart();
         while (opModeIsActive()) {
-            // defiantly doing stuff, I need to recommit
             board.setDriveState(Board0.drivingDirection.FORWARD);
             board.setDriveSpeed(0.5);
             board.setDriveTime(1000);
