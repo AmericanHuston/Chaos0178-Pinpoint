@@ -138,8 +138,7 @@ public class SpecimenAuto extends LinearOpMode {    public DcMotorEx SliderLeft;
             desired_claw_position = CLAW_CLOSED;
             armAction();
             //start with claw closed
-            //raise sliders DONE
-            //tilt arm DONE
+            //raise sliders and tilt arm
             state = armState.above_bar;
             arm();
             armAction();

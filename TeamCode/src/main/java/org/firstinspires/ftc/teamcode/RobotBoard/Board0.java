@@ -202,7 +202,7 @@ public class Board0 {
     }
 
     public void stateMachinesAct(stateMachineAct stateMachine) {
-        //Tell all the motors to do what they are supposed to do
+        //Tell all the motors to do what they are supposed to do.
         switch (stateMachine){
             case ARM:
                 wrist.setPosition(desired_wrist_position);
