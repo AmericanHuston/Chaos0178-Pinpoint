@@ -200,7 +200,6 @@ public class Board0 {
                 break;
         }
     }
-
     public void stateMachinesAct(stateMachineAct stateMachine) {
         //Tell all the motors to do what they are supposed to do.
         switch (stateMachine){

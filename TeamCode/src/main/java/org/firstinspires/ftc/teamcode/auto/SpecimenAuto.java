@@ -143,7 +143,7 @@ public class SpecimenAuto extends LinearOpMode {    public DcMotorEx SliderLeft;
             arm();
             armAction();
             sleep(driveForwardTime);
-            //move forward DONE
+            //move forward
             drive(0.0, -0.6, 0.0);
             driveAction(MS_FOR_FORWARDDRIVE);
             sleep(1000);
