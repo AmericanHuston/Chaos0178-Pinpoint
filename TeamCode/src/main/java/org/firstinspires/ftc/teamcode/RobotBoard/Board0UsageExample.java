@@ -16,6 +16,7 @@ public class Board0UsageExample extends LinearOpMode {
             board.setDriveTime(1000);
             board.stateMachinesThink(Board0.stateMachineAct.DRIVE);
             board.stateMachinesAct(Board0.stateMachineAct.DRIVE);
+            sleep(500);
             board.setClawState(Board0.clawPositions.CLAW_OPEN); //Set the claw to open once act is called
             board.stateMachinesThink(Board0.stateMachineAct.CLAW); //Think about it
             board.stateMachinesAct(Board0.stateMachineAct.CLAW);//Do it
@@ -23,6 +24,7 @@ public class Board0UsageExample extends LinearOpMode {
             board.setClawState(Board0.clawPositions.CLAW_CLOSED);
             board.stateMachinesThink(Board0.stateMachineAct.CLAW);
             board.stateMachinesAct(Board0.stateMachineAct.CLAW);
+            sleep(400);
             board.setArmState(Board0.armStates.BELOW_BAR);
             board.stateMachinesThink(Board0.stateMachineAct.ARM);
             board.stateMachinesAct(Board0.stateMachineAct.ARM);
@@ -30,7 +32,7 @@ public class Board0UsageExample extends LinearOpMode {
             board.setArmState(Board0.armStates.RESTING);
             board.stateMachinesThink(Board0.stateMachineAct.ARM);
             board.stateMachinesAct(Board0.stateMachineAct.ARM);
-            requestOpModeStop();
+            break;
         }
     }
 }
